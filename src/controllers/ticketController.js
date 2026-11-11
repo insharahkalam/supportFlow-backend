@@ -12,7 +12,7 @@ const TRANSITIONS = {
   'New': ['Assigned'],
   'Assigned': ['In Progress', 'Resolved'],
   'In Progress': ['Resolved'],
-  'Resolved': [] // sirf reopen se
+  'Resolved': [] 
 };
 
 const generateTicketNumber = () => {
