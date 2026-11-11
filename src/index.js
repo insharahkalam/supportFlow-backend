@@ -22,7 +22,7 @@ const io = initializeSocket(server);
 // Middleware
 app.use(cors({
     origin: process.env.NODE_ENV === 'production'
-        ? 'https://your-frontend-domain.com'
+        ? 'https://support-flow-frontend-zeta.vercel.app'
         : 'http://localhost:5173',
     credentials: true
 }));
