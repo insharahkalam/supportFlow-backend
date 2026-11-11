@@ -188,6 +188,8 @@ export const assignTicket = async (req, res) => {
         return res.status(403).json({ error: 'Ticket is already assigned to another agent' });
       }
       targetId = req.user._id;
+    } else if (!targetId) {
+      targetId = req.user._id; // admin bina agentId ke khud claim kare
     }
 
     if (!targetId) {
@@ -211,7 +213,7 @@ export const assignTicket = async (req, res) => {
   }
 };
 
-// Agent AI suggestion edit karke confirm kare
+// Agent AI suggestion edit karke confirm kare (review ke baad hi final hota hai)
 export const reviewAiSuggestion = async (req, res) => {
   try {
     const { category, priority, summary } = req.body;
@@ -226,19 +228,29 @@ export const reviewAiSuggestion = async (req, res) => {
     if (req.user.role === 'agent' && !sameId(ticket.agent, req.user._id)) {
       return res.status(403).json({ error: 'Not assigned to this ticket. Claim it first.' });
     }
+    // AI/agent ka output store hone se pehle validate
     if (!CATEGORIES.includes(category) || !PRIORITIES.includes(priority)) {
       return res.status(400).json({ error: 'Invalid category or priority' });
     }
 
     ticket.category = category;
     ticket.priority = priority;
+    ticket.aiSuggestion.category = category;
+    ticket.aiSuggestion.priority = priority;
     if (summary?.trim()) ticket.aiSuggestion.summary = summary.trim();
+    ticket.aiSuggestion.processed = true;
     ticket.aiSuggestion.reviewed = true;
     ticket.aiSuggestion.reviewedBy = req.user._id;
     ticket.aiSuggestion.reviewedAt = new Date();
 
     await ticket.save();
-    await broadcastTicket(ticket);
+    await ticket.populate([
+      { path: 'customer', select: 'name email' },
+      { path: 'agent', select: 'name email' }
+    ]);
+
+    const io = getIO();
+    io.to(`ticket-${ticket._id}`).emit('ticket-updated', ticket);
 
     res.json(ticket);
   } catch (error) {
