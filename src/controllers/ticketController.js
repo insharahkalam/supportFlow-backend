@@ -4,7 +4,8 @@ import User from '../models/User.js';
 import aiService from '../services/aiService.js';
 import { getIO } from '../config/socket.js';
 
-const CATEGORIES = ['Technical', 'Billing', 'Account', 'Product', 'Other'];
+const CATEGORIES = ['Technical Support', 'Account & Login', 'Billing & Payments', 'Refund & Returns',
+  'Order & Delivery', 'Product Issues', 'General Inquiry', 'Feature Request', 'Feedback & Suggestions', 'Other'];
 const PRIORITIES = ['Low', 'Medium', 'High'];
 
 // Allowed workflow: New → Assigned → In Progress → Resolved
@@ -12,7 +13,7 @@ const TRANSITIONS = {
   'New': ['Assigned'],
   'Assigned': ['In Progress', 'Resolved'],
   'In Progress': ['Resolved'],
-  'Resolved': [] 
+  'Resolved': []
 };
 
 const generateTicketNumber = () => {
